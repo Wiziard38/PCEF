@@ -5,7 +5,7 @@
 
 #define WIDTH 80
 #define HEIGHT 25
-#define CONST_CAR 30752
+#define CONST_CAR 0x0F20
 #define INIT_PTR 0xB8000
 #define DEFAULT_BACK_COLOR 0
 #define DEFAULT_TEXT_COLOR 15

@@ -27,7 +27,7 @@ void        efface_ecran(void)
 {
     int16_t* ptr = (int16_t*)INIT_PTR;
     for (int16_t i = 0; i < (HEIGHT * WIDTH); i++) {
-        *ptr++ = 0;
+        *ptr++ = CONST_CAR;
     }
 }
 
