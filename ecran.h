@@ -7,15 +7,29 @@
 #define HEIGHT 25
 #define CONST_CAR 0x0F20
 #define INIT_PTR 0xB8000
-#define DEFAULT_BACK_COLOR 0
-#define DEFAULT_TEXT_COLOR 15
 
+enum COLORS {
+    BLACK,
+    BLUE,
+    GREEN,
+    CYAN,
+    RED,
+    MAGENTA,
+    BROWN,
+    GRAY,
+    DARK_GRAY,
+    LIGHT_BLUE,
+    LIGHT_GREEN,
+    LIGHT_CYAN,
+    LIGHT_RED,
+    LIGHT_MAGENTA,
+    YELLOW,
+    WHITE
+};
 
 uint16_t     *ptr_mem(uint32_t lig,  uint32_t col);
 
 void        ecrit_car(uint32_t lig,     uint32_t col,   char c);
-
-void        ecrit_car_colored(uint32_t lig,     uint32_t col,   char c,    int8_t background_color,   int8_t color);
 
 void        efface_ecran(void);
 
@@ -31,5 +45,6 @@ void        defilement(void);
 
 void        console_putbytes(const char *s,     int len);
 
+void        affichage_timer(const char *s);
 
 #endif

@@ -5,8 +5,8 @@
 
 static int32_t LIGNE_CURRENT = 0;
 static int32_t COLONNE_CURRENT = 0;
-static int8_t TEXT_BACK_COLOR = DEFAULT_BACK_COLOR;
-static int8_t TEXT_COLOR = DEFAULT_TEXT_COLOR;
+static int8_t TEXT_BACK_COLOR = BLACK;
+static int8_t TEXT_COLOR = WHITE;
 
 
 uint16_t     *ptr_mem(uint32_t lig,  uint32_t col) 
@@ -43,8 +43,8 @@ void        place_curseur(uint32_t lig,     uint32_t col)
 
 void        deplace_curseur(uint32_t delta_lig,     uint32_t delta_col)
 {
+    LIGNE_CURRENT = ((COLONNE_CURRENT + delta_col) / WIDTH + LIGNE_CURRENT + delta_lig);
     COLONNE_CURRENT = (COLONNE_CURRENT + delta_col) % WIDTH;
-    LIGNE_CURRENT = ((COLONNE_CURRENT) / WIDTH + LIGNE_CURRENT + delta_lig);
     if (LIGNE_CURRENT >= HEIGHT) {
         LIGNE_CURRENT = HEIGHT - 1;
         COLONNE_CURRENT = WIDTH - 1;
@@ -122,4 +122,17 @@ void        console_putbytes(const char *s,     int len)
     for (int i = 0; i < len; i ++) {
         traite_car(s[i]);
     }
+}
+
+void        affichage_timer(const char *s)
+{
+    TEXT_BACK_COLOR = DARK_GRAY;
+    int32_t lig_mem = LIGNE_CURRENT;
+    int32_t col_mem = COLONNE_CURRENT;
+    place_curseur(0, WIDTH - 10);
+    traite_car(' ');
+    console_putbytes(s, 8);
+    traite_car(' ');
+    place_curseur(lig_mem, col_mem);
+    TEXT_BACK_COLOR = BLACK;
 }

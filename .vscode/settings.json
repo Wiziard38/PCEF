@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "cstring": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "inttypes.h": "c",
+        "stdio.h": "c",
+        "traitants.h": "c"
     }
 }
