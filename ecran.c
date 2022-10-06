@@ -1,27 +1,29 @@
 #include "ecran.h"
 #include "cpu.h"
+#include "string.h"
+#include <stdio.h>
 
 static int32_t LIGNE_CURRENT = 0;
 static int32_t COLONNE_CURRENT = 0;
+static int8_t TEXT_BACK_COLOR = DEFAULT_BACK_COLOR;
+static int8_t TEXT_COLOR = DEFAULT_TEXT_COLOR;
 
 
-int16_t     *ptr_mem(uint32_t lig,  uint32_t col) 
+uint16_t     *ptr_mem(uint32_t lig,  uint32_t col) 
 {
-    return (int16_t*)(INIT_PTR + 2*(lig*80 + col));    
+    return (uint16_t *)(INIT_PTR + 2*(lig*80 + col));    
 }
 
-
-void        ecrit_car(uint32_t lig,    uint32_t col,    char c,    int8_t background_color,   int8_t color)
+void        ecrit_car(uint32_t lig,     uint32_t col,   char c)
 {
-    int16_t* ptr = ptr_mem(lig, col);
+    uint16_t* ptr = ptr_mem(lig, col);
     int16_t res = 0;
-    res += (background_color << 12);
-    res += (color << 8);
+    res += (TEXT_BACK_COLOR << 12);
+    res += (TEXT_COLOR << 8);
     res += c;
 
     *ptr = res;
 }
-
 
 void        efface_ecran(void)
 {
@@ -29,8 +31,8 @@ void        efface_ecran(void)
     for (int16_t i = 0; i < (HEIGHT * WIDTH); i++) {
         *ptr++ = CONST_CAR;
     }
+    place_curseur(0, 0);
 }
-
 
 void        place_curseur(uint32_t lig,     uint32_t col)
 {
@@ -39,10 +41,20 @@ void        place_curseur(uint32_t lig,     uint32_t col)
     affiche_curseur();
 }
 
+void        deplace_curseur(uint32_t delta_lig,     uint32_t delta_col)
+{
+    COLONNE_CURRENT = (COLONNE_CURRENT + delta_col) % WIDTH;
+    LIGNE_CURRENT = ((COLONNE_CURRENT) / WIDTH + LIGNE_CURRENT + delta_lig);
+    if (LIGNE_CURRENT >= HEIGHT) {
+        LIGNE_CURRENT = HEIGHT - 1;
+        COLONNE_CURRENT = WIDTH - 1;
+    }
+    affiche_curseur();
+}
 
 void        affiche_curseur(void)
 {
-    uint16_t pos = LIGNE_CURRENT * 80 + COLONNE_CURRENT;
+    uint16_t pos = LIGNE_CURRENT * WIDTH + COLONNE_CURRENT;
     uint8_t tmp;
 
     // Partie basse
@@ -60,41 +72,54 @@ void        affiche_curseur(void)
 void        traite_car(char c)
 {   
     if (32 <= c && c <= 126) {
-        ecrit_car(LIGNE_CURRENT, COLONNE_CURRENT, c, DEFAULT_BACK_COLOR, DEFAULT_TEXT_COLOR);
+        ecrit_car(LIGNE_CURRENT, COLONNE_CURRENT, c);
+        deplace_curseur(0, 1);
     } 
     
     switch (c) {
     case 8:
         if (COLONNE_CURRENT != 0) {
-            COLONNE_CURRENT -= 1;
+            place_curseur(LIGNE_CURRENT, COLONNE_CURRENT - 1);
         }
         break;
     
     case 9:
-        COLONNE_CURRENT = ((COLONNE_CURRENT / 8) + 1) * 8;
-        if (COLONNE_CURRENT == 80) {
-            COLONNE_CURRENT = 79;
-        }
+        int32_t new_col = COLONNE_CURRENT + 8 - COLONNE_CURRENT % 8;
+        new_col = (COLONNE_CURRENT == 80) ? 79 : COLONNE_CURRENT;
+        place_curseur(LIGNE_CURRENT, new_col);
         break;
     
     case 10:
-        COLONNE_CURRENT = 0;
-        LIGNE_CURRENT += 1;
+        int32_t new_line = (LIGNE_CURRENT == 24) ? 24 : LIGNE_CURRENT + 1;
+        place_curseur(new_line, 0);
         break;
     
     case 12:
         efface_ecran();
-        COLONNE_CURRENT = 0;
-        LIGNE_CURRENT = 0;
+        place_curseur(0, 0);
         break;
     
     case 13:
-        COLONNE_CURRENT = 0;
+        place_curseur(LIGNE_CURRENT, 0);
         break;
     
     default:
         break;
     }
+}
 
+void        defilement(void)
+{
+    uint16_t * mem_from = ptr_mem(0, 0);
+    uint16_t * mem_to = ptr_mem(1, 0);
+    memmove(mem_from, mem_to, WIDTH*HEIGHT*2);
+    LIGNE_CURRENT -= 1;
     affiche_curseur();
+}
+
+void        console_putbytes(const char *s,     int len)
+{
+    for (int i = 0; i < len; i ++) {
+        traite_car(s[i]);
+    }
 }

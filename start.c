@@ -1,6 +1,7 @@
 #include <cpu.h>
 #include <inttypes.h>
 #include "ecran.h"
+#include "stdio.h"
 
 // on peut s'entrainer a utiliser GDB avec ce code de base
 // par exemple afficher les valeurs de x, n et res avec la commande display
@@ -8,13 +9,9 @@
 
 void kernel_start(void)
 {
-    ecrit_car(10, 30, 99, 2, 11);
     efface_ecran();
-    ecrit_car(10, 40, 104, 2, 11);
-
-    place_curseur(1, 1);
-
-
+    printf("test");
+    
     // quand on saura gerer l'ecran, on pourra afficher x
     //(void)x;
     // on ne doit jamais sortir de kernel_start

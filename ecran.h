@@ -11,13 +11,17 @@
 #define DEFAULT_TEXT_COLOR 15
 
 
-int16_t     *ptr_mem(uint32_t lig,  uint32_t col);
+uint16_t     *ptr_mem(uint32_t lig,  uint32_t col);
 
-void        ecrit_car(uint32_t lig,     uint32_t col,   char c,    int8_t background_color,   int8_t color);
+void        ecrit_car(uint32_t lig,     uint32_t col,   char c);
+
+void        ecrit_car_colored(uint32_t lig,     uint32_t col,   char c,    int8_t background_color,   int8_t color);
 
 void        efface_ecran(void);
 
 void        place_curseur(uint32_t lig,     uint32_t col);
+
+void        deplace_curseur(uint32_t delta_lig,     uint32_t delta_col);
 
 void        affiche_curseur(void);
 
