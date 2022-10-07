@@ -1,8 +1,8 @@
-#ifndef TRAITANTS_PIT_H
-#define TRAITANTS_PIT_H
+#ifndef CLOCK_H
+#define CLOCK_H
 
 #define QUARTZ 0x1234DD
-#define CLOCKFREQ 50
+#define CLOCKFREQ 57
 
 void        init_clock(void);
 

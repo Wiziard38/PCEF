@@ -1,5 +1,5 @@
-#ifndef TRAITANTS_H
-#define TRAITANTS_H
+#ifndef INTERRUPTIONS_H
+#define INTERRUPTIONS_H
 
 #include "stdbool.h"
 #include "inttypes.h"
