@@ -7,7 +7,7 @@
 static uint32_t CURRENT_TIME;
 static uint8_t HOURS, MINUTES, SECONDS;
 
-void        init_clock(void)
+void init_clock(void)
 {
     outb(0x34, 0x43);
     outb((QUARTZ / CLOCKFREQ) & 0xFF, 0x40);
@@ -18,7 +18,7 @@ void        init_clock(void)
     SECONDS = 0;
 }
 
-void        tic_PIT(void)
+void tic_PIT(void)
 {
     outb(0x20, 0x20);
     CURRENT_TIME += 1;

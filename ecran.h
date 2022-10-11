@@ -27,24 +27,24 @@ enum COLORS {
     WHITE
 };
 
-uint16_t     *ptr_mem(uint32_t lig,  uint32_t col);
+uint16_t *ptr_mem(uint32_t lig, uint32_t col);
 
-void        ecrit_car(uint32_t lig,     uint32_t col,   char c);
+void ecrit_car(uint32_t lig, uint32_t col, char c);
 
-void        efface_ecran(void);
+void efface_ecran(void);
 
-void        place_curseur(uint32_t lig,     uint32_t col);
+void place_curseur(uint32_t lig, uint32_t col);
 
-void        deplace_curseur(uint32_t delta_lig,     uint32_t delta_col);
+void deplace_curseur(uint32_t delta_lig, uint32_t delta_col);
 
-void        affiche_curseur(void);
+void affiche_curseur(void);
 
-void        traite_car(char c);
+void traite_car(char c);
 
-void        defilement(void);
+void defilement(void);
 
-void        console_putbytes(const char *s,     int len);
+void console_putbytes(const char *s, int len);
 
-void        affichage_timer(const char *s);
+void affichage_timer(const char *s);
 
 #endif

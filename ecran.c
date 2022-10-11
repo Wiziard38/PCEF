@@ -9,12 +9,12 @@ static int8_t TEXT_BACK_COLOR = BLACK;
 static int8_t TEXT_COLOR = WHITE;
 
 
-uint16_t     *ptr_mem(uint32_t lig,  uint32_t col) 
+uint16_t *ptr_mem(uint32_t lig, uint32_t col) 
 {
     return (uint16_t *)(INIT_PTR + 2*(lig*80 + col));    
 }
 
-void        ecrit_car(uint32_t lig,     uint32_t col,   char c)
+void ecrit_car(uint32_t lig, uint32_t col, char c)
 {
     uint16_t* ptr = ptr_mem(lig, col);
     int16_t res = 0;
@@ -25,7 +25,7 @@ void        ecrit_car(uint32_t lig,     uint32_t col,   char c)
     *ptr = res;
 }
 
-void        efface_ecran(void)
+void efface_ecran(void)
 {
     int16_t* ptr = (int16_t*)INIT_PTR;
     for (int16_t i = 0; i < (HEIGHT * WIDTH); i++) {
@@ -34,14 +34,14 @@ void        efface_ecran(void)
     place_curseur(0, 0);
 }
 
-void        place_curseur(uint32_t lig,     uint32_t col)
+void place_curseur(uint32_t lig, uint32_t col)
 {
     LIGNE_CURRENT = lig,
     COLONNE_CURRENT = col;
     affiche_curseur();
 }
 
-void        deplace_curseur(uint32_t delta_lig,     uint32_t delta_col)
+void deplace_curseur(uint32_t delta_lig, uint32_t delta_col)
 {
     LIGNE_CURRENT = ((COLONNE_CURRENT + delta_col) / WIDTH + LIGNE_CURRENT + delta_lig);
     COLONNE_CURRENT = (COLONNE_CURRENT + delta_col) % WIDTH;
@@ -52,7 +52,7 @@ void        deplace_curseur(uint32_t delta_lig,     uint32_t delta_col)
     affiche_curseur();
 }
 
-void        affiche_curseur(void)
+void affiche_curseur(void)
 {
     uint16_t pos = LIGNE_CURRENT * WIDTH + COLONNE_CURRENT;
     uint8_t tmp;
@@ -69,7 +69,7 @@ void        affiche_curseur(void)
 }
 
 
-void        traite_car(char c)
+void traite_car(char c)
 {   
     if (32 <= c && c <= 126) {
         ecrit_car(LIGNE_CURRENT, COLONNE_CURRENT, c);
@@ -108,7 +108,7 @@ void        traite_car(char c)
     }
 }
 
-void        defilement(void)
+void defilement(void)
 {
     uint16_t * mem_from = ptr_mem(0, 0);
     uint16_t * mem_to = ptr_mem(1, 0);
@@ -117,14 +117,14 @@ void        defilement(void)
     affiche_curseur();
 }
 
-void        console_putbytes(const char *s,     int len)
+void console_putbytes(const char *s, int len)
 {
     for (int i = 0; i < len; i ++) {
         traite_car(s[i]);
     }
 }
 
-void        affichage_timer(const char *s)
+void affichage_timer(const char *s)
 {
     TEXT_BACK_COLOR = DARK_GRAY;
     int32_t lig_mem = LIGNE_CURRENT;
