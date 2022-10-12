@@ -4,14 +4,12 @@
 #include "cpu.h"
 #include <stdlib.h>
 
-Processus PROCESS_TABLE[NUMBER_PROCESS];
 static uint32_t CURRENT_INDEX_PROC = 0;
 
-
-void init_processus(int32_t pid, char processus_name[20], Processus_states processus_state)
+void init_processus(int32_t pid, char * processus_name, Processus_states processus_state)
 {
     if (CURRENT_INDEX_PROC >= NUMBER_PROCESS) {
-        printf("trop de processus !");
+        printf("Trop de processus !");
     } else {
     Processus current_process;
     current_process.pid = pid;
@@ -26,7 +24,7 @@ void init_processus(int32_t pid, char processus_name[20], Processus_states proce
 void idle(void)
 {
     printf("[idle] je tente de passer la main a proc1...\n");
-    //ctx_sw(..., ...);
+    ctx_sw(&(PROCESS_TABLE[0].save_zone[0]), &(PROCESS_TABLE[1].save_zone[0]));
 }
 
 

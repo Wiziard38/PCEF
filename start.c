@@ -22,7 +22,8 @@ void kernel_start(void)
     /* Initialisations des processus */
     init_processus(0, "idle", elu);
     init_processus(1, "proc1", activable);
-
+    PROCESS_TABLE[1].save_zone[1] = (uint32_t) &PROCESS_TABLE[1].pile_exec[511];
+    PROCESS_TABLE[1].pile_exec[511] = (uint32_t) &proc1;
 
     idle();
 

@@ -19,7 +19,11 @@ typedef struct Processus {
     uint32_t pile_exec[PILE_SIZE_PROCESS];
 } Processus;
 
-void init_processus(int32_t pid, char processus_name[20], Processus_states processus_state);
+Processus PROCESS_TABLE[NUMBER_PROCESS];
+
+void ctx_sw(uint32_t * old_process, uint32_t * new_process);
+
+void init_processus(int32_t pid, char * processus_name, Processus_states processus_state);
 
 void idle(void);
 
