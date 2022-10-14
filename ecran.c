@@ -90,8 +90,13 @@ void traite_car(char c)
         break;
     
     case 10:
-        int32_t new_line = (LIGNE_CURRENT == 24) ? 24 : LIGNE_CURRENT + 1;
-        place_curseur(new_line, 0);
+        int32_t new_line = LIGNE_CURRENT + 1;
+        if (new_line != 25) {
+            place_curseur(new_line, 0);
+        } else {
+            defilement();
+            place_curseur(24, 0);
+        }
         break;
     
     case 12:
