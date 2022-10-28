@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "inttypes.h": "c",
-        "processus.h": "c"
+        "processus.h": "c",
+        "sstream": "c"
     }
 }

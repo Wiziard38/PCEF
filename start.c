@@ -20,7 +20,7 @@ void kernel_start(void)
     init_clock();
     
     /* Initialisations des processus */
-    init_process();
+    init_processes();
 
     idle();
 
