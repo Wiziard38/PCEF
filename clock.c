@@ -41,3 +41,7 @@ void tic_PIT(void)
     sprintf(output, "%02d:%02d:%02d", HOURS, MINUTES, SECONDS);
     affichage_timer(output);
 }
+
+uint32_t get_nbr_ticks(void) {
+    return HOURS*3600 + MINUTES*60 + SECONDS + CURRENT_TIME;
+}

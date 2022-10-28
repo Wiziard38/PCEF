@@ -4,6 +4,7 @@
 #include "cpu.h"
 #include <stdlib.h>
 #include "tinyalloc.h"
+#include "clock.h"
 
 static uint32_t CURRENT_INDEX_PROC = 0;
 
@@ -35,6 +36,7 @@ int32_t cree_processus(void (*code)(void), char *nom) {
     new_process->pid = CURRENT_INDEX_PROC;
     strcpy(new_process->processus_name, nom);
     new_process->processus_state = WAITING;
+    new_process->sleeping_time = 0;
     new_process->save_zone[1] = (uint32_t) (&(new_process->pile_exec[511]));
     new_process->pile_exec[511] = (uint32_t) code;
 
@@ -53,6 +55,7 @@ int32_t init_idle_processus(void) {
     idle_process->pid = 0;
     strcpy(idle_process->processus_name, "idle");
     idle_process->processus_state = RUNNING;
+    idle_process->sleeping_time = 0;
     
     PROCESS_TABLE[0] = idle_process;
     CURRENT_INDEX_PROC++;
@@ -79,6 +82,7 @@ void proc(void) {
 
 void ordonnance(void) {
     insert_tail_process(extract_head_process());
+    
     ctx_sw(linked_waiting_process.last->save_zone, linked_waiting_process.first->save_zone);
 }
 
@@ -103,8 +107,10 @@ void insert_tail_process(struct Processus *current_process) {
     linked_waiting_process.last = current_process;
 }
 
+
 void dors(uint32_t nbr_secs) {
     Processus * process = extract_head_process();
+    process->sleeping_time = nbr_secs + get_nbr_ticks();
     process->processus_state = SLEEPING;
     if (linked_sleeping_process.first == NULL) {
         linked_sleeping_process.first = process;

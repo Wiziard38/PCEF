@@ -18,6 +18,7 @@ typedef struct Processus {
     Processus_states processus_state;
     uint32_t save_zone[5];
     uint32_t pile_exec[PILE_SIZE_PROCESS];
+    uint32_t sleeping_time;
     struct Processus * suivant;
 } Processus;
 
