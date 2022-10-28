@@ -3,6 +3,7 @@
 #include "ecran.h"
 #include "inttypes.h"
 #include "stdio.h"
+#include "processus.h"
 
 static uint32_t CURRENT_TIME;
 static uint8_t HOURS, MINUTES, SECONDS;
@@ -33,8 +34,9 @@ void tic_PIT(void)
                 HOURS += 1;
             }
         }
+        ordonnance();
     }
-    
+
     char output[9];
     sprintf(output, "%02d:%02d:%02d", HOURS, MINUTES, SECONDS);
     affichage_timer(output);

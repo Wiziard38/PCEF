@@ -22,9 +22,10 @@ void kernel_start(void)
     /* Initialisations des processus */
     init_processes();
 
+    masque_IRQ(0, 0);
+    
     idle();
 
-    // masque_IRQ(0, 0);
     // démasquage des interruptions externes
     // sti();
     // boucle d’attente

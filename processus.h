@@ -9,6 +9,7 @@
 typedef enum Processus_states {
     RUNNING,
     WAITING,
+    SLEEPING,
 } Processus_states;
 
 typedef struct Processus {
@@ -42,5 +43,11 @@ void ordonnance(void);
 int32_t mon_pid(void);
 
 char *mon_nom(void);
+
+struct Processus *extract_head_process(void);
+
+void insert_tail_process(struct Processus *current_process);
+
+void dors(uint32_t nbr_secs);
 
 #endif

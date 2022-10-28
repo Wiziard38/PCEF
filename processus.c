@@ -8,11 +8,11 @@
 static uint32_t CURRENT_INDEX_PROC = 0;
 
 Processus * PROCESS_TABLE[NUMBER_PROCESS];
-Processus_linked list_processus;
+Processus_linked linked_waiting_process;
+Processus_linked linked_sleeping_process;
 
 
-void init_processes(void)
-{
+void init_processes(void) {
     init_idle_processus();
     for (int i = 1; i <= NUMBER_PROCESS - 1; i++) {
         char process_name[20] = "";
@@ -21,8 +21,8 @@ void init_processes(void)
         PROCESS_TABLE[i-1]->suivant = PROCESS_TABLE[i];
     }
 
-    list_processus.first = PROCESS_TABLE[0];
-    list_processus.last = PROCESS_TABLE[NUMBER_PROCESS - 1];
+    linked_waiting_process.first = PROCESS_TABLE[0];
+    linked_waiting_process.last = PROCESS_TABLE[NUMBER_PROCESS - 1];
 }
 
 
@@ -44,8 +44,7 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 }
 
 
-int32_t init_idle_processus(void)
-{
+int32_t init_idle_processus(void) {
     if (CURRENT_INDEX_PROC != 0) {
         printf("Idle non premier !");
         return -1;
@@ -60,40 +59,56 @@ int32_t init_idle_processus(void)
     return 0;
 }
 
-//         ctx_sw(&(PROCESS_TABLE[0].save_zone[0]), &(PROCESS_TABLE[1].save_zone[0]));
-
-void idle(void)
-{
+void idle(void) {
     for (;;) {
         printf("[%s] pid = %i\n", mon_nom(), mon_pid());
-        ordonnance();
+        sti();
+        hlt();
+        cli();
     }
 }
 
 void proc(void) {
     for (;;) {
         printf("[%s] pid = %i\n", mon_nom(), mon_pid());
-        ordonnance();
+        sti();
+        hlt();
+        cli();
     }
 }
 
-void ordonnance(void)
-{
-    Processus * current = list_processus.first;
-    list_processus.first = current->suivant;
-    list_processus.last->suivant = current;
-    list_processus.last = current;
-    current->processus_state = WAITING;
-    list_processus.first->processus_state = RUNNING;
-    ctx_sw(current->save_zone, list_processus.first->save_zone);
+void ordonnance(void) {
+    insert_tail_process(extract_head_process());
+    ctx_sw(linked_waiting_process.last->save_zone, linked_waiting_process.first->save_zone);
 }
 
-int32_t mon_pid(void)
-{
-    return list_processus.first->pid;
+int32_t mon_pid(void) {
+    return linked_waiting_process.first->pid;
 }
 
-char *mon_nom(void)
-{
-    return list_processus.first->processus_name;
+char *mon_nom(void) {
+    return linked_waiting_process.first->processus_name;
+}
+
+struct Processus *extract_head_process(void) {
+    Processus * current_process = linked_waiting_process.first;
+    linked_waiting_process.first = current_process->suivant;
+    current_process->processus_state = WAITING;
+    linked_waiting_process.first->processus_state = RUNNING;
+    return current_process;
+}
+
+void insert_tail_process(struct Processus *current_process) {
+    linked_waiting_process.last->suivant = current_process;
+    linked_waiting_process.last = current_process;
+}
+
+void dors(uint32_t nbr_secs) {
+    Processus * process = extract_head_process();
+    process->processus_state = SLEEPING;
+    if (linked_sleeping_process.first == NULL) {
+        linked_sleeping_process.first = process;
+    } else {
+        linked_sleeping_process.last->suivant = process;
+    }
 }
