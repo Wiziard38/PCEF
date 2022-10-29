@@ -81,8 +81,13 @@ void proc(void) {
 }
 
 void ordonnance(void) {
-    insert_tail_process(extract_head_process());
-    
+    insert_tail_process(extract_head_process(linked_waiting_process), linked_waiting_process);
+    while (linked_sleeping_process.first->sleeping_time < get_nbr_ticks()) {
+        Processus waking_process = extract_head_process(linked_sleeping_process);
+        waking_process.sleeping_time = 0;
+        waking_process.processus_state = WAITING;
+        insert_tail_process(waking_process, linked_waiting_process);
+    }
     ctx_sw(linked_waiting_process.last->save_zone, linked_waiting_process.first->save_zone);
 }
 
@@ -94,17 +99,17 @@ char *mon_nom(void) {
     return linked_waiting_process.first->processus_name;
 }
 
-struct Processus *extract_head_process(void) {
-    Processus * current_process = linked_waiting_process.first;
-    linked_waiting_process.first = current_process->suivant;
+struct Processus *extract_head_process(struct Processus_linked type_linked_process) {
+    Processus * current_process = type_linked_process.first;
+    type_linked_process.first = current_process->suivant;
     current_process->processus_state = WAITING;
-    linked_waiting_process.first->processus_state = RUNNING;
+    type_linked_process.first->processus_state = RUNNING;
     return current_process;
 }
 
-void insert_tail_process(struct Processus *current_process) {
-    linked_waiting_process.last->suivant = current_process;
-    linked_waiting_process.last = current_process;
+void insert_tail_process(struct Processus *current_process, struct Processus_linked type_linked_process) {
+    type_linked_process.last->suivant = current_process;
+    type_linked_process.last = current_process;
 }
 
 
@@ -114,7 +119,23 @@ void dors(uint32_t nbr_secs) {
     process->processus_state = SLEEPING;
     if (linked_sleeping_process.first == NULL) {
         linked_sleeping_process.first = process;
+        return;
     } else {
-        linked_sleeping_process.last->suivant = process;
+        Processus * current_process = linked_waiting_process.first;
+        if (current_process->sleeping_time > process->sleeping_time) {
+            process->suivant = current_process;
+            linked_sleeping_process.first = process;
+        } else {
+            while (current_process->suivant->sleeping_time > process->sleeping_time) {
+                if (current_process->suivant == linked_sleeping_process.last) {
+                    linked_sleeping_process.last->suivant = process;
+                    linked_sleeping_process.last = process;
+                    return;
+                }
+                current_process = current_process->suivant;
+            }
+            process->suivant = current_process->suivant;
+            current_process->suivant = process;
+        }
     }
 }

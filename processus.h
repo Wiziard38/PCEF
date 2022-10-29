@@ -45,9 +45,9 @@ int32_t mon_pid(void);
 
 char *mon_nom(void);
 
-struct Processus *extract_head_process(void);
+struct Processus *extract_head_process(struct Processus_linked type_linked_process);
 
-void insert_tail_process(struct Processus *current_process);
+void insert_tail_process(struct Processus *current_process, struct Processus_linked type_linked_process);
 
 void dors(uint32_t nbr_secs);
 
