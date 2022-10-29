@@ -83,9 +83,9 @@ void proc(void) {
 void ordonnance(void) {
     insert_tail_process(extract_head_process(linked_waiting_process), linked_waiting_process);
     while (linked_sleeping_process.first->sleeping_time < get_nbr_ticks()) {
-        Processus waking_process = extract_head_process(linked_sleeping_process);
-        waking_process.sleeping_time = 0;
-        waking_process.processus_state = WAITING;
+        Processus * waking_process = extract_head_process(linked_sleeping_process);
+        waking_process->sleeping_time = 0;
+        waking_process->processus_state = WAITING;
         insert_tail_process(waking_process, linked_waiting_process);
     }
     ctx_sw(linked_waiting_process.last->save_zone, linked_waiting_process.first->save_zone);
@@ -114,7 +114,7 @@ void insert_tail_process(struct Processus *current_process, struct Processus_lin
 
 
 void dors(uint32_t nbr_secs) {
-    Processus * process = extract_head_process();
+    Processus * process = extract_head_process(linked_waiting_process);
     process->sleeping_time = nbr_secs + get_nbr_ticks();
     process->processus_state = SLEEPING;
     if (linked_sleeping_process.first == NULL) {
