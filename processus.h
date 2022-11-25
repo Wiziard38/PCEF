@@ -10,6 +10,7 @@ typedef enum Processus_states {
     RUNNING,
     WAITING,
     SLEEPING,
+    DYING,
 } Processus_states;
 
 typedef struct Processus {
@@ -50,5 +51,7 @@ struct Processus *extract_head_process(struct Processus_linked *type_linked_proc
 void insert_tail_process(struct Processus *current_process, struct Processus_linked *type_linked_process);
 
 void dors(uint32_t nbr_secs);
+
+void fin_processus(void);
 
 #endif

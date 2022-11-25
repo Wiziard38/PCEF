@@ -11,6 +11,7 @@ static uint32_t CURRENT_INDEX_PROC = 0;
 Processus * PROCESS_TABLE[NUMBER_PROCESS];
 Processus_linked linked_waiting_process;
 Processus_linked linked_sleeping_process;
+Processus_linked linked_killing_process;
 
 
 int32_t cree_processus(void (*code)(void), char *nom) {
@@ -66,11 +67,12 @@ void proc1(void) {
 }
 
 void proc2(void) {
-    for (;;) {
+    for (int i = 0; i < 2; i++) {
         printf("[temps = %u] processus %s pid = %i\n", get_nbr_secondes(),
         mon_nom(), mon_pid());
         dors(3);
     }
+    fin_processus();
 }
 
 void proc3(void) {
@@ -107,6 +109,11 @@ void ordonnance(void) {
     if (linked_waiting_process.first->suivant != NULL) {
         insert_tail_process(extract_head_process(&linked_waiting_process), &linked_waiting_process);
         ctx_sw(linked_waiting_process.last->save_zone, linked_waiting_process.first->save_zone);
+    }
+
+    while (linked_killing_process.first != NULL) {
+        Processus * to_kill_process = extract_head_process(&linked_killing_process);
+        free(to_kill_process);
     }
 }
 
@@ -174,4 +181,12 @@ void dors(uint32_t nbr_secs) {
     linked_sleeping_process.last = to_place_process;
     ctx_sw(to_place_process->save_zone, linked_waiting_process.first->save_zone);
     return;
+}
+
+void fin_processus(void) {
+    printf("Killing processus %s pid = %i\n", mon_nom(), mon_pid());
+    Processus * to_kill_process = extract_head_process(&linked_waiting_process);
+    to_kill_process->processus_state = DYING;
+    insert_tail_process(to_kill_process, &linked_killing_process);
+    ctx_sw(to_kill_process->save_zone, linked_waiting_process.first->save_zone);
 }
