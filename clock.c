@@ -23,7 +23,8 @@ void tic_PIT(void)
 {
     outb(0x20, 0x20);
     CURRENT_TIME += 1;
-    if (CURRENT_TIME == 57) {
+    ordonnance();
+    if (CURRENT_TIME == CLOCKFREQ) {
         CURRENT_TIME = 0;
         SECONDS += 1;
         if (SECONDS == 60) {
@@ -34,7 +35,6 @@ void tic_PIT(void)
                 HOURS += 1;
             }
         }
-        ordonnance();
     }
 
     char output[9];
@@ -43,5 +43,9 @@ void tic_PIT(void)
 }
 
 uint32_t get_nbr_ticks(void) {
-    return HOURS*3600 + MINUTES*60 + SECONDS + CURRENT_TIME;
+    return (HOURS*3600 + MINUTES*60 + SECONDS)*CLOCKFREQ + CURRENT_TIME;
+}
+
+uint32_t get_nbr_secondes(void) {
+    return HOURS*3600 + MINUTES*60 + SECONDS;
 }

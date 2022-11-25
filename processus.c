@@ -13,20 +13,6 @@ Processus_linked linked_waiting_process;
 Processus_linked linked_sleeping_process;
 
 
-void init_processes(void) {
-    init_idle_processus();
-    for (int i = 1; i <= NUMBER_PROCESS - 1; i++) {
-        char process_name[20] = "";
-        sprintf(process_name, "proc%d", i);
-        cree_processus(&proc, process_name);
-        PROCESS_TABLE[i-1]->suivant = PROCESS_TABLE[i];
-    }
-
-    linked_waiting_process.first = PROCESS_TABLE[0];
-    linked_waiting_process.last = PROCESS_TABLE[NUMBER_PROCESS - 1];
-}
-
-
 int32_t cree_processus(void (*code)(void), char *nom) {
     if (CURRENT_INDEX_PROC >= NUMBER_PROCESS) {
         printf("Trop de processus !");
@@ -62,33 +48,66 @@ int32_t init_idle_processus(void) {
     return 0;
 }
 
-void idle(void) {
+void idle() {
     for (;;) {
-        printf("[%s] pid = %i\n", mon_nom(), mon_pid());
+        //printf("idle \n");
         sti();
         hlt();
         cli();
     }
 }
 
-void proc(void) {
+void proc1(void) {
     for (;;) {
-        printf("[%s] pid = %i\n", mon_nom(), mon_pid());
-        sti();
-        hlt();
-        cli();
+        printf("[temps = %u] processus %s pid = %i\n", get_nbr_secondes(),
+        mon_nom(), mon_pid());
+        dors(2);
     }
 }
+
+void proc2(void) {
+    for (;;) {
+        printf("[temps = %u] processus %s pid = %i\n", get_nbr_secondes(),
+        mon_nom(), mon_pid());
+        dors(3);
+    }
+}
+
+void proc3(void) {
+    for (;;) {
+        printf("[temps = %u] processus %s pid = %i\n", get_nbr_secondes(),
+        mon_nom(), mon_pid());
+        dors(5);
+    }
+}
+
+void init_processes(void) {
+    init_idle_processus();
+    cree_processus(&proc1, "proc1");
+    cree_processus(&proc2, "proc2");
+    cree_processus(&proc3, "proc3");
+
+    for (int i = 1; i <= NUMBER_PROCESS - 1; i++) {
+        PROCESS_TABLE[i-1]->suivant = PROCESS_TABLE[i];
+    }
+
+    linked_waiting_process.first = PROCESS_TABLE[0];
+    linked_waiting_process.last = PROCESS_TABLE[NUMBER_PROCESS - 1];
+}
+
 
 void ordonnance(void) {
-    insert_tail_process(extract_head_process(linked_waiting_process), linked_waiting_process);
-    while (linked_sleeping_process.first->sleeping_time < get_nbr_ticks()) {
-        Processus * waking_process = extract_head_process(linked_sleeping_process);
+    while (linked_sleeping_process.first != NULL && linked_sleeping_process.first->sleeping_time < get_nbr_ticks()) {
+        Processus * waking_process = extract_head_process(&linked_sleeping_process);
         waking_process->sleeping_time = 0;
         waking_process->processus_state = WAITING;
-        insert_tail_process(waking_process, linked_waiting_process);
+        insert_tail_process(waking_process, &linked_waiting_process);
     }
-    ctx_sw(linked_waiting_process.last->save_zone, linked_waiting_process.first->save_zone);
+
+    if (linked_waiting_process.first->suivant != NULL) {
+        insert_tail_process(extract_head_process(&linked_waiting_process), &linked_waiting_process);
+        ctx_sw(linked_waiting_process.last->save_zone, linked_waiting_process.first->save_zone);
+    }
 }
 
 int32_t mon_pid(void) {
@@ -99,43 +118,60 @@ char *mon_nom(void) {
     return linked_waiting_process.first->processus_name;
 }
 
-struct Processus *extract_head_process(struct Processus_linked type_linked_process) {
-    Processus * current_process = type_linked_process.first;
-    type_linked_process.first = current_process->suivant;
+struct Processus *extract_head_process(struct Processus_linked *type_linked_process) {
+    Processus * current_process = (*type_linked_process).first;
+    if (current_process->suivant == NULL) {
+        (*type_linked_process).first = NULL;
+    } else {
+        (*type_linked_process).first = current_process->suivant;
+        (*type_linked_process).first->processus_state = RUNNING;
+    }
     current_process->processus_state = WAITING;
-    type_linked_process.first->processus_state = RUNNING;
+    current_process->suivant = NULL;
     return current_process;
 }
 
-void insert_tail_process(struct Processus *current_process, struct Processus_linked type_linked_process) {
-    type_linked_process.last->suivant = current_process;
-    type_linked_process.last = current_process;
+void insert_tail_process(struct Processus *current_process, struct Processus_linked *type_linked_process) {
+    (*type_linked_process).last->suivant = current_process;
+    (*type_linked_process).last = current_process;
 }
 
 
 void dors(uint32_t nbr_secs) {
-    Processus * process = extract_head_process(linked_waiting_process);
-    process->sleeping_time = nbr_secs + get_nbr_ticks();
-    process->processus_state = SLEEPING;
+    Processus * to_place_process = extract_head_process(&linked_waiting_process);
+    to_place_process->sleeping_time = nbr_secs*60 + get_nbr_ticks();
+    to_place_process->processus_state = SLEEPING;
+
     if (linked_sleeping_process.first == NULL) {
-        linked_sleeping_process.first = process;
+        linked_sleeping_process.first = to_place_process;
+        linked_sleeping_process.last = to_place_process;
+        to_place_process->suivant = NULL;
+        ctx_sw(to_place_process->save_zone, linked_waiting_process.first->save_zone);
         return;
-    } else {
-        Processus * current_process = linked_waiting_process.first;
-        if (current_process->sleeping_time > process->sleeping_time) {
-            process->suivant = current_process;
-            linked_sleeping_process.first = process;
-        } else {
-            while (current_process->suivant->sleeping_time > process->sleeping_time) {
-                if (current_process->suivant == linked_sleeping_process.last) {
-                    linked_sleeping_process.last->suivant = process;
-                    linked_sleeping_process.last = process;
-                    return;
-                }
-                current_process = current_process->suivant;
-            }
-            process->suivant = current_process->suivant;
-            current_process->suivant = process;
-        }
     }
+
+    Processus * current_process = linked_sleeping_process.first;
+    
+    if (current_process->sleeping_time > to_place_process->sleeping_time) {
+        to_place_process->suivant = current_process;
+        linked_sleeping_process.first = to_place_process;
+        ctx_sw(to_place_process->save_zone, linked_waiting_process.first->save_zone);
+        return;    
+    }
+    
+    while (current_process->suivant != NULL) {
+        if (current_process->suivant->sleeping_time > to_place_process->sleeping_time) {
+            to_place_process->suivant = current_process->suivant;
+            current_process->suivant = to_place_process;
+            ctx_sw(to_place_process->save_zone, linked_waiting_process.first->save_zone);
+            return;
+        }
+        current_process = current_process->suivant;
+    }
+
+    to_place_process->suivant = NULL;
+    linked_sleeping_process.last->suivant = to_place_process;
+    linked_sleeping_process.last = to_place_process;
+    ctx_sw(to_place_process->save_zone, linked_waiting_process.first->save_zone);
+    return;
 }

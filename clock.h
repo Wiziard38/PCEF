@@ -12,4 +12,6 @@ void tic_PIT(void);
 
 uint32_t get_nbr_ticks(void);
 
+uint32_t get_nbr_secondes(void);
+
 #endif
